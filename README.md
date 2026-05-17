@@ -110,6 +110,7 @@ Untuk test apakah bekerja bisa jalankan perintah ini:
 Jika tidak ada muncul Error,  dan jika contoh muncul seperti ini:
   
   tar: Removing leading `/' from member names
+  
   tar: Removing leading `/' from hard link targets
   
 Itu artinya berhasil dijalankan,
