@@ -31,21 +31,94 @@ Sistem ini mengikuti aturan **3-2-1 Backup Rule**:
 ### 1. Storage Provisioning (TrueNAS)
 Membuat dataset terpisah pada pool penyimpanan eksternal/internal anda (saya menggunakan HDD Seagate eksternal) untuk mengategorikan jenis backup:
 Contoh:
-- SEAGATE_STORAGE
-- `PVE_BACKUPS`
-- `PVE_BACKUPS/WEB_SERVER`
+- SEAGATE_STORAGE (Induk)
+- `PVE_BACKUPS`  (Induk PVE)
+- `PVE_BACKUPS/WEB_SERVER` (Sub/child  Datasets)
 - `PVE_BACKUPS/DOCKER`
 - `PVE_BACKUPS/PROXMOX_CONFIG`
-(Teruskan dan sesuaikan kondisi kebutuhan anda)
+(Teruskan dan sesuaikan sesuai kondisi kebutuhan anda)
 
-### 2. Hypervisor Integration
-Menghubungkan Proxmox ke TrueNAS menggunakan NFS Share dengan opsi `vzdump` content type. Hal ini memungkinkan Proxmox mengenali NAS sebagai target backup resmi.
+Membuat Shares, UNIX (NFS) Shares:
+- Pada bagian NFS Share pilih /mnt/SEAGATE_STORAGE/PVE_BACKUPS
+- Pada Advanced Options, opsi Maproot User pilih root dan opsi Maproot Group pilih root atau sesuaikan dengan punya anda
+- Save
+(Pada bagian NFS ini anda perlu membuat untuk folder induk PVE (PVE_BACKUPS) dan juga semua folder Sub/Child Datasets (PVE_BACKUPS/WEB_SERVER))
+
+### 2. Proxmox Integration
+Menghubungkan Proxmox ke TrueNAS menggunakan NFS Share:
+- Pada GUI proxmox anda, masuk ke Datacenter, pilih Storage
+- Klik Add, pilih NFS
+- Isi kolomnya
+ ID: Backups-TrueNAS (Sesuaikan dengan milik anda).
+
+ Server: 10.30.0.243 (IP TrueNAS Anda).
+
+ Export: Klik tanda panah bawah, nanti otomatis muncul /mnt/SEAGATE_STORAGE/PVE_BACKUPS.
+
+ Content: Pilih semua atau sesuai kebutuhan anda
+
+ Node: pilih nama node anda yang ingin di backup (misal pve-homelab)
+
+- Klik Save/Add
+(Pada bagian ini anda perlu membuat satu persatu untuk semua folder/datasets yang anda buat agar file backup dapat tersimpan sesuai folder yang sudah terorganisir, terutama sesuaikan pada bagian Export dan ID)
+
+Masih di Datacenter, pergi ke menu Backup:
+- Klik Add
+- Kolom Node, isi dengan node anda yang ingin di Backup
+- Kolom Storage, pilih kategori yang telah anda buat sebelumnya tadi (misal Backups-TrueNAS)
+- Schedule, sesuaikan dengan keinginan anda (misal pilih everyday  21:00)
+- Selection mode, pilih All atau Include selected VMs (sesuaikan dengan kebutuhan anda)
+- Compression: Pilih ZSTD (paling cepat dan efisien)
+- Mode, pilih Snapshot
+- Klik Create
+(Pada bagian ini anda perlu membuat hal yang sama untuk semua kategori yang telah anda buat sebelumnya, Terutama ubah pada bagian Storage dan sesuaikan)
 
 ### 3. Automation Script & Crontab
 Menggunakan script bash untuk mengamankan konfigurasi OS Proxmox yang tidak tercakup dalam backup VM standar.
 - **Script:** `scripts/backup-pve-config.sh`
-- **Schedule:** `0 0 * * *` (Setiap tengah malam).
+- **Schedule:** `0 0 * * *` (Setiap tengah malam)
 
+Tools Backup Konfigurasi Proxmox
+Jalankan perintah ini di Shell Proxmox anda:
+  nano /usr/local/bin/backup-pve-config.sh
+
+Lalu tempel kode ini (ini akan mem-backup settingan network, user, dan VM list):
+
+#!/bin/bash
+# Tentukan lokasi mount NFS TrueNAS Anda di Proxmox
+BACKUP_PATH="/mnt/pve/TrueNAS-Config"
+DATE=$(date +%Y-%m-%d)
+
+# Buat file tarball untuk folder konfigurasi krusial
+tar -czf $BACKUP_PATH/pve-config-$DATE.tar.gz /etc/pve /etc/network/interfaces /etc/hosts /etc/fstab /var/lib/pve-cluster
+
+# Hapus backup yang lebih tua dari 30 hari di folder tersebut
+find $BACKUP_PATH -type f -name "*.tar.gz" -mtime +30 -delete
+
+Simpan Ctrl + O, Enter, lalu Ctrl + X
+
+Berikan izin dengan:
+  chmod +x /usr/local/bin/backup-pve-config.sh
+
+Terakhir, agar script jalan otomatis setiap jam 12 malam, ketik crontab -e dan tambahkan baris ini di paling bawah:
+  0 0 * * * /bin/bash /usr/local/bin/backup-pve-config.sh
+
+  Simpan  Ctrl + O, Enter, lalu Ctrl + X
+
+Untuk test apakah bekerja bisa jalankan perintah ini:
+  /bin/bash /usr/local/bin/backup-pve-config.sh
+
+Jika tidak ada muncul Error,  dan jika contoh muncul seperti ini:
+  tar: Removing leading `/' from member names
+  tar: Removing leading `/' from hard link targets
+Itu artinya berhasil dijalankan,
+
+Untuk memastikan File Backup sudah ada, jalankan perintah:
+  ls -lh /mnt/pve/Backup-ProxmoxConfig (Nama kategori Backup-ProxmoxConfig sesuaikan dengan kategori milik anda)
+
+Jika muncul seperti ini (pve-config-2026-05-17.tar.gz), berarti berhasil
+
+  
 ### 4. Redundancy via Syncthing
 Mengonfigurasi Syncthing sebagai jembatan sinkronisasi antara server dan Laptop/PC pribadi. 
 - **Mode:** `Receive Only` pada sisi laptop untuk menjaga integritas data di server.
