@@ -82,27 +82,17 @@ Menggunakan script bash untuk mengamankan konfigurasi OS Proxmox yang tidak terc
 - **Script:** `scripts/backup-pve-config.sh`
 - **Schedule:** `0 0 * * *` (Setiap tengah malam)
 
-Tools Backup Konfigurasi Proxmox
+**Tools Backup Konfigurasi Proxmox**
 
 Jalankan perintah ini di Shell Proxmox anda:
   
   nano /usr/local/bin/backup-pve-config.sh
 
-Lalu tempel kode ini (ini akan mem-backup settingan network, user, dan VM list):
-
-#!/bin/bash
-# Tentukan lokasi mount NFS TrueNAS Anda di Proxmox
-BACKUP_PATH="/mnt/pve/TrueNAS-Config"
-DATE=$(date +%Y-%m-%d)
-
-# Buat file tarball untuk folder konfigurasi krusial
-tar -czf $BACKUP_PATH/pve-config-$DATE.tar.gz /etc/pve /etc/network/interfaces /etc/hosts /etc/fstab /var/lib/pve-cluster
-
-# Hapus backup yang lebih tua dari 30 hari di folder tersebut
-find $BACKUP_PATH -type f -name "*.tar.gz" -mtime +30 -delete
+Lalu tempel kode yang ada di dalam Folder Scripts di Repository ini (ini akan mem-backup settingan network, user, dan VM list):
 
 Simpan Ctrl + O, Enter, lalu Ctrl + X
 
+Lalu,
 Berikan izin dengan:
  
   chmod +x /usr/local/bin/backup-pve-config.sh
