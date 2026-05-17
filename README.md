@@ -61,9 +61,11 @@ Menghubungkan Proxmox ke TrueNAS menggunakan NFS Share:
  Node: pilih nama node anda yang ingin di backup (misal pve-homelab)
 
 - Klik Save/Add
+
 (Pada bagian ini anda perlu membuat satu persatu untuk semua folder/datasets yang anda buat agar file backup dapat tersimpan sesuai folder yang sudah terorganisir, terutama sesuaikan pada bagian Export dan ID)
 
 Masih di Datacenter, pergi ke menu Backup:
+
 - Klik Add
 - Kolom Node, isi dengan node anda yang ingin di Backup
 - Kolom Storage, pilih kategori yang telah anda buat sebelumnya tadi (misal Backups-TrueNAS)
