@@ -49,6 +49,7 @@ Menghubungkan Proxmox ke TrueNAS menggunakan NFS Share:
 - Pada GUI proxmox anda, masuk ke Datacenter, pilih Storage
 - Klik Add, pilih NFS
 - Isi kolomnya
+
  ID: Backups-TrueNAS (Sesuaikan dengan milik anda).
 
  Server: 10.30.0.243 (IP TrueNAS Anda).
