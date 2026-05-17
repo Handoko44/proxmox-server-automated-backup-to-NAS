@@ -131,6 +131,6 @@ Mengonfigurasi Syncthing sebagai jembatan sinkronisasi antara server dan Laptop/
 
 ## 📸 Project Preview
 *(Pastikan nama file di bawah ini sesuai dengan yang Anda upload di folder screenshots)*
-- **Dataset Structure:** ![TrueNAS](./screenshots/truenas-datasets.png)
-- **Proxmox Storage:** ![PVE](./screenshots/proxmox-nfs.png)
-- **Sync Status:** ![Syncthing](./screenshots/syncthing-success.png)
+- **Dataset Structure:** ![TrueNAS](./truenas-datasets.png)
+- **Proxmox Storage:** ![PVE](./proxmox-nfs.png)
+- **Sync Status:** ![Syncthing](./syncthing-success.png)
