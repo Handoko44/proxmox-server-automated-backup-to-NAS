@@ -74,6 +74,7 @@ Masih di Datacenter, pergi ke menu Backup:
 - Compression: Pilih ZSTD (paling cepat dan efisien)
 - Mode, pilih Snapshot
 - Klik Create
+
 (Pada bagian ini anda perlu membuat hal yang sama untuk semua kategori yang telah anda buat sebelumnya, Terutama ubah pada bagian Storage dan sesuaikan)
 
 ### 3. Automation Script & Crontab
@@ -82,7 +83,9 @@ Menggunakan script bash untuk mengamankan konfigurasi OS Proxmox yang tidak terc
 - **Schedule:** `0 0 * * *` (Setiap tengah malam)
 
 Tools Backup Konfigurasi Proxmox
+
 Jalankan perintah ini di Shell Proxmox anda:
+  
   nano /usr/local/bin/backup-pve-config.sh
 
 Lalu tempel kode ini (ini akan mem-backup settingan network, user, dan VM list):
@@ -101,22 +104,28 @@ find $BACKUP_PATH -type f -name "*.tar.gz" -mtime +30 -delete
 Simpan Ctrl + O, Enter, lalu Ctrl + X
 
 Berikan izin dengan:
+ 
   chmod +x /usr/local/bin/backup-pve-config.sh
 
 Terakhir, agar script jalan otomatis setiap jam 12 malam, ketik crontab -e dan tambahkan baris ini di paling bawah:
+  
   0 0 * * * /bin/bash /usr/local/bin/backup-pve-config.sh
 
   Simpan  Ctrl + O, Enter, lalu Ctrl + X
 
 Untuk test apakah bekerja bisa jalankan perintah ini:
+ 
   /bin/bash /usr/local/bin/backup-pve-config.sh
 
 Jika tidak ada muncul Error,  dan jika contoh muncul seperti ini:
+  
   tar: Removing leading `/' from member names
   tar: Removing leading `/' from hard link targets
+  
 Itu artinya berhasil dijalankan,
 
 Untuk memastikan File Backup sudah ada, jalankan perintah:
+  
   ls -lh /mnt/pve/Backup-ProxmoxConfig (Nama kategori Backup-ProxmoxConfig sesuaikan dengan kategori milik anda)
 
 Jika muncul seperti ini (pve-config-2026-05-17.tar.gz), berarti berhasil
